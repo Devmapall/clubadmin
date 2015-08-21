@@ -58,7 +58,7 @@ class PDOWrapper {
 			$pdo = self::getInstance();
 			
 			foreach($keyvalue as $key=>$value) {
-				$stmt = $pdo->("INSERT INTO :table (key,value) VALUES (:key, :value);";
+				$stmt = $pdo->prepare("INSERT INTO :table (key,value) VALUES (:key, :value);");
 				$stmt->execute(array(":table"=>$table."_info", ":key"=>$key, ":value"=>$value));
 			}
 		} else {
@@ -66,7 +66,48 @@ class PDOWrapper {
 		}
 	}
 	
-	public static function update($table, $
+	public static function update($table, $id, $keyvalue) {
+            if(is_int($key) && is_array($keyvalue)) {
+                $pdo = self::getInstance();
+                
+                foreach($keyvalue as $key=>$val) {
+                    $stmt = $pdo->prepare("UPDATE :table SET :key = :val WHERE ID = :primary");
+                    $stmt->execute(array(":table"=>$table,":key"=>$key,":val"=>$val,":primary"=>$id));
+                }
+            } else {
+                if(!is_int($key))
+                    throw new Exception("PDOWrapper: update: ID is not an integer value");
+                
+                if(!is_array($keyvalue))
+                    throw new Exception("PDOWrapper: update: Keyvalue is not an array");
+            }
+        }
+        
+        public static function updateInfo($table, $id, $keyvalue) {
+            if(is_int($key) && is_array($keyvalue)) {
+                $pdo = self::getInstance();
+                
+                foreach($keyvalue as $key=>$val) {
+                    $stmt = $pdo->prepare("UPDATE :table SET :key = :val WHERE ID = :primary");
+                    $stmt->execute(array(":table"=>$table."_info",":key"=>$key,":val"=>$val,":primary"=>$id));
+                }
+            } else {
+                if(!is_int($key))
+                    throw new Exception("PDOWrapper: updateInfo: ID is not an integer value");
+                
+                if(!is_array($keyvalue))
+                    throw new Exception("PDOWrapper: updateInfo: Keyvalue is not an array");
+            }
+        }
+        
+        public static function delete($table, $id) {
+            if(is_int($id)) {
+                $pdo = self::getInstance();
+                
+                $stmt = $pdo->prepare("DELETE FROM :table WHERE ID = :id");
+                $stmt->execute(array(":table"=>$table,":id"=>$id));
+            }
+        }
 }
 
 ?>
